@@ -7,6 +7,9 @@ on:
 
 jobs:
 
+  # ==========================================
+  # 1. BUILD ANGULAR APPLICATION
+  # ==========================================
   build:
     name: Build Angular
     runs-on: ubuntu-latest
@@ -16,6 +19,7 @@ jobs:
         working-directory: ./my-angular-app
 
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -27,16 +31,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Angular
+      - name: Build Angular application
         run: npm run build
 
 
+  # ==========================================
+  # 2. BUILD AND PUSH DOCKER IMAGE
+  # ==========================================
   docker:
     name: Build and Push Docker Image
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -56,3 +64,37 @@ jobs:
         run: |
           docker push \
             ${{ secrets.DOCKER_USERNAME }}/myfrontend:${{ github.sha }}
+
+
+  # ==========================================
+  # 3. DEPLOY TO LOCAL MINIKUBE
+  # ==========================================
+  deploy:
+    name: Deploy to Minikube
+    needs: docker
+    runs-on: self-hosted
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image for Minikube
+        run: |
+          docker build \
+            -t myfrontend:${{ github.sha }} \
+            ./my-angular-app
+
+      - name: Load image into Minikube
+        run: |
+          minikube image load myfrontend:${{ github.sha }}
+
+      - name: Update Kubernetes deployment
+        run: |
+          kubectl set image deployment/myfrontend-deployment \
+            myfrontend-container=myfrontend:${{ github.sha }}
+
+      - name: Wait for Kubernetes rollout
+        run: |
+          kubectl rollout status deployment/myfrontend-deployment
+
