@@ -1,0 +1,7 @@
+services:
+  frontend:
+    image: myfrontend:1.0
+    container_name: myfrontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
