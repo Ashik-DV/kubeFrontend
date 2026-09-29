@@ -1,8 +1,25 @@
+
 <h1>Welcome to my application</h1>
-<form>
-    <label>Name</label>
-    <input type="text" placeholder="Enter your name" [(ngModel)]="username" name="username">
-    <label>Password</label>
-    <input type="text" placeholder="Enter your Password" [(ngModel)]="password" name="password">
- <button type="submit" (click)="submithandle()">submit</button>
+
+<form (ngSubmit)="submithandle()">
+
+  <label>Name</label>
+  <input
+    type="text"
+    placeholder="Enter your name"
+    [(ngModel)]="username"
+    name="username"
+  >
+
+  <label>Password</label>
+  <input
+    type="password"
+    placeholder="Enter your password"
+    [(ngModel)]="password"
+    name="password"
+  >
+
+  <button type="submit">Submit</button>
+
 </form>
+
